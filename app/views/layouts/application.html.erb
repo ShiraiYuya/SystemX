@@ -9,6 +9,11 @@
   </head>
 
   <body>
+	<header>
+		<%= link_to "出力", :action => "index" %>
+		<%= link_to "設定", :action => "conf" %>
+		<%= link_to "在庫", :action => "stock" %>
+	</header>
     <%= yield %>
   </body>
 </html>

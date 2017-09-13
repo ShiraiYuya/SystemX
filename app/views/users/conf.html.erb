@@ -1,0 +1,51 @@
+<h1>Users#config</h1>
+
+<div>
+	<h2>原料</h2>
+	<table>
+	<tr>
+		<th>名称</th>
+		<th>削除</th>
+	</tr>
+	<% @materials.each do |material| %>
+	<tr>
+		<td><%= material.name %></td>
+		<td>削除</td>
+	</tr>
+	<% end %>
+	</table>
+</div>
+
+<div>
+	<h2>製品</h2>
+	<table>
+	<tr>
+		<th>名称</th>
+		<th>原料(1kgあたり)</th>
+		<th>保管</th>
+		<th>保管期限</th>
+		<th>削除</th>
+	</th>
+	<% @products.each do |product| %>
+	<tr>
+		<td><%= product.name %></td>
+		<td>追加</td>
+		<td><%= product.storage %></td>
+		<td><%= product.timelimit %></td>
+		<td>削除</td>
+	</tr>
+	<% end %>
+	</table>
+	
+	<% if false %>
+	<%= form_for Product.new,:url =>{:action => :conf} do |f| %>
+		<%= f.label :name %>
+		<%= f.text_field :name %>
+		<%= f.label :srorage %>
+		<%= f.text_field :storage %>
+		<%= f.label :timelimit %>
+		<%= f.text_field :timelimit %>
+		<%= f.submit %>
+	<% end %>
+	<% end %>
+</div>
