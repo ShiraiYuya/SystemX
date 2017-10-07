@@ -8,10 +8,10 @@
 		<th>削除</th>
 	</tr>
 	<% @materials.each do |material| %>
-	<tr>
-		<td><%= material.name %></td>
-		<td>削除</td>
-	</tr>
+		<tr>
+			<td><%= material.name %></td>
+			<td><%= button_to "削除", :action => "conf" %></td>
+		</tr>
 	<% end %>
 	</table>
 </div>
