@@ -1,0 +1,5 @@
+﻿
+gitコマンドのメモです
+git add * //全てのファイル・ディレクトリを追加
+git commit -m "コミット名"
+git push origin master

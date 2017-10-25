@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   get 'users/stock'
   
-  post 'index' => 'users/conf'
+  post 'users/index' => 'users/index'
   
   post 'users/conf' => 'users/conf'
 

@@ -1,6 +1,65 @@
-<h1>Users#index</h1>
-<p>Find me in app/views/users/index.html.erb</p>
 
 
+<h3>CSVファイル送信</h3>
+<%= form_tag({controller: "users", action: "index", method: "post"}, {multipart: true}) do %>
+  <%= file_field_tag :file %>
+  <%= submit_tag "送信" %>
+<% end %>
+
+<br><br>
+
+<h3>本日の製造量(<%= @time.month %>月<%= @time.day %>日)</h3>
+<table>
+  <tr>
+    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+  </tr>
+  <tr>
+    <td class="vertical">本日出荷量</td>
+	<td><%= @today.f_ship %></td>
+	<td><%= @today.z_ship %></td>
+	<td><%= @today.other_ship %></td>
+	<td><%= @today.f_ship + @today.z_ship + @today.other_ship%></td>
+  </tr>
+  <tr>
+    <td class="vertical">作り置き利用分</td>
+	<td><%= @today.f_stored %></td>
+	<td><%= @today.z_stored %></td>
+	<td class="nodata"></td>
+	<td><%= @today.f_stored + @today.z_stored %></td>
+  </tr>
+  <tr>
+    <td class="vertical">本日分製造量</td>
+	<td><%= @today.f_ship - @today.f_stored %></td>
+	<td><%= @today.z_ship - @today.z_stored %></td>
+	<td><%= @today.other_ship %></td>
+	<td><%= @today.f_ship - @today.f_stored + @today.z_ship - @today.z_stored + @today.other_ship %></td>
+  </tr>
+  <tr>
+    <td class="vertical">作り置き分製造量</td>
+	<td><%= @today.f_store %></td>
+	<td><%= @today.z_store %></td>
+	<td class="nodata"></td>
+	<td><%= @today.f_store + @today.z_store %></td>
+  </tr>
+  <tr>
+    <td class="vertical">総製造量</td>
+	<td><%= @today.f_ship - @today.f_stored + @today.f_store %></td>
+	<td><%= @today.z_ship - @today.z_stored + @today.z_store %></td>
+	<td><%= @today.other_ship %></td>
+	<td><%= @today.f_ship - @today.f_stored + @today.f_store + @today.f_ship - @today.f_stored + @today.f_store + @today.other_ship %></td>
+  </tr>
+</table>
+
+<br><br>
+
+<h3>今週の製造量推移</h3>
 <%= column_chart @chart_data, stacked: true,
-colors: ["#f00", "#00f","ff0","#ffe5de","#e8e8e8"],y: 35 %>
+colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
+
+<h3>今週の出荷量推移</h3>
+<%= column_chart @chart_data2, stacked: true,
+colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990"],legend: false %>
+
+<p><%= @f_store %></p>
+<p><%= @z_store %></p>
+<p><%= @other %></p>
