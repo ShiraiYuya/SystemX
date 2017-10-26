@@ -1,14 +1,5 @@
-
-
-<h3>CSVファイル送信</h3>
-<%= form_tag({controller: "users", action: "index", method: "post"}, {multipart: true}) do %>
-  <%= file_field_tag :file %>
-  <%= submit_tag "送信" %>
-<% end %>
-
-<br><br>
-
-<h3>本日の製造量(<%= @time.month %>月<%= @time.day %>日)</h3>
+<div class="ship-table">
+<h3>本日(<%= @time.month %>月<%= @time.day %>日)の製造量</h3>
 <table>
   <tr>
     <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
@@ -50,15 +41,27 @@
   </tr>
 </table>
 
-<br><br>
+<%= form_tag({controller: "users", action: "index", method: "post"}, {multipart: true}) do %>
+	<%= submit_tag "送信" %>
+  <%= file_field_tag :file %>
+<% end %>
 
+</div>
+
+
+
+<br><br>
+<div class="ckick-graph">
 <h3>今週の製造量推移</h3>
 <%= column_chart @chart_data, stacked: true,
 colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
+</div>
 
+<div class="ckick-graph">
 <h3>今週の出荷量推移</h3>
 <%= column_chart @chart_data2, stacked: true,
 colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990"],legend: false %>
+</div>
 
 <p><%= @f_store %></p>
 <p><%= @z_store %></p>

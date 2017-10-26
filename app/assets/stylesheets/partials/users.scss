@@ -1,0 +1,67 @@
+// Place all the styles related to the users controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+header{
+	height:40px;
+	background-color:#bbf;
+	padding:3px;
+	color: #fff;
+	font-size:25px;
+	font-weight: 700;
+}
+
+h3{
+	font-weight:600;
+	margin-left:10px;
+}
+
+table{
+	margin:auto;
+	background-color:#fff;
+}
+
+th{
+	width:60px;
+	height:30px;
+	background-color:#aaa;
+	border: solid 2px #fff;
+	text-align:center;
+}
+
+td{
+	background-color:#eee;
+	height:30px;
+	border: solid 2px #fff;
+	text-align:right;
+}
+
+td.vertical{
+	width:150px;
+	text-align:left;
+	background-color:#ccc;
+}
+
+td.nodata{
+	background-color:#666;
+}
+
+form{
+	margin:auto;
+	width: 400px;
+}
+
+input{
+	float: right;
+	margin: 3px;
+}
+
+.ship-table{
+	margin-bottom: 10px;
+}
+
+.ckick-graph{
+	width:50%;
+	float:left;
+}
+

@@ -5,7 +5,7 @@ class UsersController < ApplicationController
 	
 	@time = Time.zone.now
 	date = Time.zone.today
-	date = date.ago(4.day)
+	#date = date.ago(4.day)
 	wday = date.wday
 	
 	#csvを受け取って出荷量（f,z,other別）をDBとpythonに渡す
