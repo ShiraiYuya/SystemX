@@ -1,5 +1,6 @@
 <div class="ship-table">
 <h3>本日(<%= @time.month %>月<%= @time.day %>日)の製造量</h3>
+<% if @table_display then %>
 <table>
   <tr>
     <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
@@ -40,16 +41,23 @@
 	<td><%= @today.f_ship - @today.f_stored + @today.f_store + @today.f_ship - @today.f_stored + @today.f_store + @today.other_ship %></td>
   </tr>
 </table>
+<% else %>
+<p id="noexcel">
+	<%=@noexcelmsg %>
+</p>
+<% end %>
 
+<% if !@sunday then %>
 <%= form_tag({controller: "users", action: "index", method: "post"}, {multipart: true}) do %>
 	<%= submit_tag "送信" %>
   <%= file_field_tag :file %>
+<% end %>
 <% end %>
 
 </div>
 
 
-
+<% if !@sunday then %>
 <br><br>
 <div class="ckick-graph">
 <h3>今週の製造量推移</h3>
@@ -61,6 +69,20 @@ colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990","#ffe5de","#e8e8e8"],l
 <h3>今週の出荷量推移</h3>
 <%= column_chart @chart_data2, stacked: true,
 colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990"],legend: false %>
+</div>
+
+<% end %>
+
+<div class="ckick-graph nw-graph">
+<h3>翌週の製造量推移</h3>
+<%= column_chart @chart_data3, stacked: true,
+colors: ["#fff","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
+</div>
+
+<div class="ckick-graph nw-graph">
+<h3>翌週の出荷量推移</h3>
+<%= column_chart @chart_data4, stacked: true,
+colors: ["#fff","#900","#009","#990"],legend: false %>
 </div>
 
 <p><%= @f_store %></p>
