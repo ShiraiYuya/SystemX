@@ -1,6 +1,6 @@
 <div class="ship-table">
 <h3>本日(<%= @time.month %>月<%= @time.day %>日)の製造量</h3>
-<% if @table_display then %>
+<% if @view_mode == 4 then %>
 <table>
   <tr>
     <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
@@ -47,17 +47,59 @@
 </p>
 <% end %>
 
-<% if !@sunday then %>
-<%= form_tag({controller: "users", action: "index", method: "post"}, {multipart: true}) do %>
-	<%= submit_tag "送信" %>
-  <%= file_field_tag :file %>
+<% if @view_mode == 2 then %>
+	<%= form_tag({controller: "users",action: "index", method: "post"}, {multipart: true}) do %>
+		<%= hidden_field_tag :setting_fin, @view_mode == 3 ? true:false %>
+		<%= hidden_field_tag :supposed_date, @tabledate.date %>
+		<%= submit_tag "送信" %>
+	<%= file_field_tag :file %>
+	<% end %>
 <% end %>
+
+
+<% if @view_mode == 3 then %>
+	<%= form_tag({controller: "users",action: "index", method: "post"}, {multipart: true}) do %>
+<table class="fin_table">
+  <tr>
+    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+  </tr>
+  <tr>
+    <td class="vertical">当日分製造量</td>
+	<td><%= @tabledate.f_ship - @tabledate.f_stored %></td>
+	<td><%= @tabledate.z_ship - @tabledate.z_stored %></td>
+	<td><%= @tabledate.other_ship %></td>
+	<td><%= @tabledate.f_ship - @tabledate.f_stored + @tabledate.z_ship - @tabledate.z_stored + @tabledate.other_ship %></td>
+  </tr>
+</table>
+		<%= hidden_field_tag :setting_fin, @view_mode == 3 ? true:false %>
+		<%= hidden_field_tag :supposed_date, @tabledate.date %>
+		<%= submit_tag "送信" %>
+		<%= file_field_tag :file %>
+	<% end %>
+	<%= form_tag({controller: "users",action: "index", method: "post"}, {multipart: true}) do %>
+<br><br>
+<table class="fin_table">
+  <tr>
+    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+  </tr>
+  <tr>
+    <td class="vertical">作り置き分製造量</td>
+	<td><%= text_field_tag :f_result, @tabledate.f_store,:size=>"3" %></td>
+	<td><%= text_field_tag :z_result, @tabledate.z_store,:size=>"3" %></td>
+	<td class="nodata"></td>
+	<td><%= @tabledate.f_store + @tabledate.z_store %></td>
+  </tr>
+</table>	
+		<%= submit_tag "確定" %>
+		<%= hidden_field_tag :setting_fin, true %>
+		<%= hidden_field_tag :supposed_date, @tabledate.date %>
+	<% end %>
 <% end %>
 
 </div>
 
 
-<% if !@sunday then %>
+<% if @view_mode != 1 then %>
 <br><br>
 <div class="ckick-graph">
 <h3>今週の製造量推移</h3>
@@ -71,8 +113,6 @@ colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990","#ffe5de","#e8e8e8"],l
 colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990"],legend: false %>
 </div>
 
-<% end %>
-
 <div class="ckick-graph nw-graph">
 <h3>翌週の製造量推移</h3>
 <%= column_chart @chart_data3, stacked: true,
@@ -85,6 +125,4 @@ colors: ["#fff","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
 colors: ["#fff","#900","#009","#990"],legend: false %>
 </div>
 
-<p><%= @f_store %></p>
-<p><%= @z_store %></p>
-<p><%= @other %></p>
+<% end %>

@@ -10,8 +10,16 @@
 
   <body>
 	<header>
-		受注量予測システム
+		受注量予測システム	
+		<% if user_signed_in? %>
+			<%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
+			<%#= link_to 'プロフィール変更', edit_user_registration_path %>
+		<% else %>
+			 <%#= link_to 'サインアップ', new_user_registration_path %>
+			<%#= link_to 'ログイン', new_user_session_path %>
+		<% end %>
 	</header>
+	<% if user_signed_in? %>
 	<nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -24,13 +32,21 @@
         </div>
         <div class="collapse navbar-collapse" id="navbarEexample">
             <ul class="nav navbar-nav">
-				<li class="<%= 'active' if controller.action_name == 'index' %>"><%= link_to "出力",:action => 'index' %></li>
-				<li class="<%= 'active' if current_page?(action:'conf') %>"><%= link_to "設定",:action => 'conf' %></li>
-				<li class="<%= 'active' if current_page?(action:'stock') %>"><%= link_to "在庫", :action => 'stock' %></li>
+				<li class="<%= 'active' if controller.action_name == 'index' %>"><%= link_to "出力",:controller => '/users', :action => 'index' %></li>
+				<li class="<%= 'active' if controller.action_name == 'conf' %>"><%= link_to "設定",:controller => '/users', :action => 'conf' %></li>
+				<li class="<%= 'active' if current_page?(:controller => '/users',action:'stock') %>"><%= link_to "在庫",:controller => '/users',  :action => 'stock' %></li>
 			</ul>
         </div>
     </div>
 	</nav>
+	<% end %>
+	
+	<% if false %>
+	<p class="notice"><%= notice %></p>
+	<% end %>
+	<% if alert %>
+	<p class="alert"><%= alert %></p>
+	<% end %>
 	
     <%= yield %>
   </body>

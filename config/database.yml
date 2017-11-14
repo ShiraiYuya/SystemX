@@ -49,6 +49,9 @@ test:
 #
 production:
   <<: *default
-  database: SystemX_production
-  username: SystemX
-  password: <%= ENV['SYSTEMX_DATABASE_PASSWORD'] %>
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+#  database: SystemX_production
+#  username: SystemX
+#  password: <%= ENV['SYSTEMX_DATABASE_PASSWORD'] %>

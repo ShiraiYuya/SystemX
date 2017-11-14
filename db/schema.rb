@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171018090959) do
+ActiveRecord::Schema.define(version: 20171113094956) do
 
   create_table "amounts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.date "date"
@@ -23,9 +23,11 @@ ActiveRecord::Schema.define(version: 20171018090959) do
     t.integer "other_ship", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "f_pred", default: 0
-    t.integer "z_pred", default: 0
-    t.integer "other_pred", default: 0
+    t.integer "f_morn", default: 0
+    t.integer "z_morn", default: 0
+    t.integer "other_morn", default: 0
+    t.boolean "is_def", default: false
+    t.boolean "is_fin", default: false
   end
 
   create_table "materials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -50,6 +52,24 @@ ActiveRecord::Schema.define(version: 20171018090959) do
     t.integer "timelimit"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "email", default: ""
+    t.string "name", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_users_on_name", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
 end
