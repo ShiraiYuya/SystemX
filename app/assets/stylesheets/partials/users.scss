@@ -38,6 +38,7 @@ table.fin_table{
 
 th{
 	width:60px;
+	max-width:60px;
 	height:30px;
 	background-color:#aaa;
 	border: solid 2px #fff;
@@ -46,6 +47,7 @@ th{
 
 td{
 	background-color:#eee;
+//	max-width:60px;
 	height:30px;
 	border: solid 2px #fff;
 	text-align:right;

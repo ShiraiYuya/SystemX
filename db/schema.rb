@@ -10,24 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171113094956) do
+ActiveRecord::Schema.define(version: 20171118074740) do
 
   create_table "amounts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.date "date"
-    t.integer "f_ship", default: 0
-    t.integer "f_stored", default: 0
-    t.integer "f_store", default: 0
-    t.integer "z_ship", default: 0
-    t.integer "z_stored", default: 0
-    t.integer "z_store", default: 0
-    t.integer "other_ship", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "f_morn", default: 0
-    t.integer "z_morn", default: 0
-    t.integer "other_morn", default: 0
+    t.float "f_ship", limit: 24, default: 0.0
+    t.float "f_stored", limit: 24, default: 0.0
+    t.float "f_store", limit: 24, default: 0.0
+    t.float "f_morn", limit: 24, default: 0.0
+    t.float "z_ship", limit: 24, default: 0.0
+    t.float "z_stored", limit: 24, default: 0.0
+    t.float "z_store", limit: 24, default: 0.0
+    t.float "z_morn", limit: 24, default: 0.0
+    t.float "other_ship", limit: 24, default: 0.0
+    t.float "other_morn", limit: 24, default: 0.0
     t.boolean "is_def", default: false
     t.boolean "is_fin", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "materials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

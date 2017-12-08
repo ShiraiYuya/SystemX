@@ -10,35 +10,35 @@
 	<td><%= @today.f_ship %></td>
 	<td><%= @today.z_ship %></td>
 	<td><%= @today.other_ship %></td>
-	<td><%= @today.f_ship + @today.z_ship + @today.other_ship%></td>
+	<td><%= @today_all_ship%></td>
   </tr>
   <tr>
     <td class="vertical">作り置き利用分</td>
 	<td><%= @today.f_stored %></td>
 	<td><%= @today.z_stored %></td>
 	<td class="nodata"></td>
-	<td><%= @today.f_stored + @today.z_stored %></td>
+	<td><%= @today_all_stored %></td>
   </tr>
   <tr>
     <td class="vertical">本日分製造量</td>
-	<td><%= @today.f_ship - @today.f_stored %></td>
-	<td><%= @today.z_ship - @today.z_stored %></td>
+	<td><%= @today_f_make %></td>
+	<td><%= @today_z_make %></td>
 	<td><%= @today.other_ship %></td>
-	<td><%= @today.f_ship - @today.f_stored + @today.z_ship - @today.z_stored + @today.other_ship %></td>
+	<td><%= @today_all_make %></td>
   </tr>
   <tr>
     <td class="vertical">作り置き分製造量</td>
 	<td><%= @today.f_store %></td>
 	<td><%= @today.z_store %></td>
 	<td class="nodata"></td>
-	<td><%= @today.f_store + @today.z_store %></td>
+	<td><%= @today_all_store %></td>
   </tr>
   <tr>
     <td class="vertical">総製造量</td>
-	<td><%= @today.f_ship - @today.f_stored + @today.f_store %></td>
-	<td><%= @today.z_ship - @today.z_stored + @today.z_store %></td>
+	<td><%= @today_f_summake %></td>
+	<td><%= @today_z_summake %></td>
 	<td><%= @today.other_ship %></td>
-	<td><%= @today.f_ship - @today.f_stored + @today.f_store + @today.f_ship - @today.f_stored + @today.f_store + @today.other_ship %></td>
+	<td><%= @today_all_summake %></td>
   </tr>
 </table>
 <% else %>
@@ -65,10 +65,10 @@
   </tr>
   <tr>
     <td class="vertical">当日分製造量</td>
-	<td><%= @tabledate.f_ship - @tabledate.f_stored %></td>
-	<td><%= @tabledate.z_ship - @tabledate.z_stored %></td>
+	<td><%= @table_f_make %></td>
+	<td><%= @table_z_make %></td>
 	<td><%= @tabledate.other_ship %></td>
-	<td><%= @tabledate.f_ship - @tabledate.f_stored + @tabledate.z_ship - @tabledate.z_stored + @tabledate.other_ship %></td>
+	<td><%= @table_all_make %></td>
   </tr>
 </table>
 		<%= hidden_field_tag :setting_fin, @view_mode == 3 ? true:false %>
@@ -87,7 +87,7 @@
 	<td><%= text_field_tag :f_result, @tabledate.f_store,:size=>"3" %></td>
 	<td><%= text_field_tag :z_result, @tabledate.z_store,:size=>"3" %></td>
 	<td class="nodata"></td>
-	<td><%= @tabledate.f_store + @tabledate.z_store %></td>
+	<td><%= @table_all_premake %></td>
   </tr>
 </table>	
 		<%= submit_tag "確定" %>
