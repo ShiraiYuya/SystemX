@@ -4,8 +4,8 @@ require 'open3'
 class UsersController < ApplicationController
   def index
   
-	#1→日曜なので非表示orエラー発生，2→is_defが必要(excelフォームのみ出現)，
-	#3→is_finが必要(excelフォームと表修正フォームが出現)，4→正常(表を表示)	※グラフは1の場合以外表示
+	#1→日曜/祝日/エラー(グラフのみ表示)，2→is_defが必要(excelフォームとグラフのみ出現)，
+	#3→is_finが必要(excelフォームと表修正フォームとグラフが出現)，4→正常(表とグラフを表示)
 	@view_mode = 0
 	@noexcelmsg　= ""
 	
@@ -73,14 +73,18 @@ class UsersController < ApplicationController
 	
 	#本日のデータ取得
 	@time = Time.zone.now
-	@time = DateTime.strptime('2017-12-05','%Y-%m-%d')
-#	date = Time.zone.today
-#	date = date.ago(0.day)
-	date = DateTime.strptime('2017-12-05','%Y-%m-%d')
+#	@time = DateTime.strptime('2017-12-31','%Y-%m-%d')
+	date = Time.zone.today
+#	date = date.ago(1.day)
+#	date = DateTime.strptime('2017-12-31','%Y-%m-%d')
 	wday = date.wday
 	
 	if wday == 0
 		@noexcelmsg = "本日は日曜日です．"
+		@view_mode = 1
+	end
+	if is_holiday(date)
+		@noexcelmsg = "本日は祝日です．"
 		@view_mode = 1
 	end
 	
@@ -204,9 +208,19 @@ class UsersController < ApplicationController
 	end	
   end
   
+  def is_holiday(date)
+	day_s = date.strftime("%m/%d")
+	if (day_s == "12/31" or day_s == "01/01" or day_s =="01/02" or day_s == "01/03")
+		return(true)
+	else
+		return(false)
+	end
+  end
   
   def regist_py(shipdate)
 	swday = shipdate.wday
+	
+	#python実行，返り値の受け取り
 	sdstring = shipdate.strftime("%Y %m %d")
 	out, err, status = Open3.capture3("cd app/assets/python;"+"python predict_daybyday.py "+sdstring+";"+"cd ../../../;", :stdin_data=>"foo\nbar\nbaz\n")
 	out = out.gsub(/(\n|\[)/,"").gsub(/(\])/,",").split(",")
@@ -218,48 +232,51 @@ class UsersController < ApplicationController
 	f_py = out[0..6]
 	z_py = out[7..13]
 	other_py = out[14..20]
-	#ここでshipが確定しているものがあれば置き換える
-	
 	
 	#shipdate~土までに作る総量sum（f,z,other別），平均averを算出
 	amount = Amount.find_by(date: shipdate)
-	f_sum = amount.f_ship - amount.f_stored
-	z_sum = amount.z_ship - amount.z_stored
-	other_sum = amount.other_ship
-	for i in swday..5 do
-		f_sum += f_py[i]
-		z_sum += z_py[i]
-		other_sum += other_py[i]
-	end
+	f_sum = amount.f_ship - amount.f_stored + f_py.sum
+	z_sum = amount.z_ship - amount.z_stored + z_py.sum
+	other_sum = amount.other_ship + other_py.sum
 	sum = f_sum + z_sum + other_sum
-	aver = (sum / (7 - swday)).to_i		
+	
+	day_remain = f_py[swday..-1].length - f_py[swday..-1].count(0) + 1
+	aver = (sum / day_remain).to_i		
 	
 	#shipdateのstore登録（f,z別）
 	store = [aver - (amount.f_ship - amount.f_stored) - (amount.z_ship - amount.z_stored) - amount.other_ship, 0].max
 	f_store = (-z_sum * (amount.f_ship - amount.f_stored) + f_sum * (amount.z_ship - amount.z_stored + store)) / (z_sum + f_sum)
 	f_store = [[f_store,store,f_py[swday]].min, 0].max
 	z_store = [store - f_store, z_py[swday]].min
+	f_store = z_store = 0 if is_holiday(shipdate)
 	store = f_store + z_store
 	amount.update(f_store: f_store, z_store: z_store)
 	
+	#sumの更新
 	sum -= (amount.f_ship - amount.f_stored + amount.f_store) + (amount.z_ship - amount.z_stored + amount.z_store) + amount.other_ship
 	f_sum -= amount.f_ship - amount.f_stored + amount.f_store
 	z_sum -= amount.z_ship - amount.z_stored + amount.z_store
 	
 	#shipdateの次の日以降のship(予測),stored,store登録
-	for i in (swday+1)..6 do		
-		aver = sum / (7 - i)
+	for i in (swday+1)..6 do
+		#stored,shipの更新
+		day_remain = f_py[(i-1)..-1].length - f_py[(i-1)..-1].count(0)
+		day_remain = 1 if day_remain == 0
+		aver = sum / day_remain
 		amount = Amount.find_or_create_by(date: shipdate.ago(swday.day).since(i.day))
 		amount.update(f_stored: f_store, z_stored: z_store, f_ship: f_py[i-1] , z_ship: z_py[i-1], other_ship: other_py[i-1])
+		amount.update(is_def: true, is_fin: true) if is_holiday(amount.date)
 		
+		#storeの計算，更新
 		store = [aver - (f_py[i-1] + z_py[i-1] + other_py[i-1] - store), 0].max
 		f_store = (-z_sum * (f_py[i-1] - f_store) + f_sum * (z_py[i-1] - z_store + store) ) / (z_sum + f_sum)
 		f_store = [[f_store,store,f_py[i]].min, 0].max
 		z_store = [store - f_store, z_py[i]].min
+		f_store = z_store = 0 if is_holiday(amount.date)
 		store = f_store + z_store
-		
 		amount.update(f_store: f_store, z_store: z_store)
 		
+		#sumの更新
 		sum -= (amount.f_ship - amount.f_stored + amount.f_store) + (amount.z_ship - amount.z_stored + amount.z_store) + amount.other_ship
 		f_sum -= amount.f_ship - amount.f_stored + amount.f_store
 		z_sum -= amount.z_ship - amount.z_stored + amount.z_store
@@ -269,9 +286,9 @@ class UsersController < ApplicationController
   
   
   def regist_py_sat(shipdate)
+	#python実行，返り値の受け取り
 	swday = shipdate.wday
 	sdstring = shipdate.strftime("%Y %m %d")
-  
 	out, err, status = Open3.capture3("cd app/assets/python;"+"python predict_next.py "+sdstring+";"+"cd ../../../;", :stdin_data=>"foo\nbar\nbaz\n")
 	out = out.gsub(/(\]\])/,",").gsub(/(\n|\[|\])/,"").split(",")
 	out = out.map(&:to_i)
@@ -294,19 +311,25 @@ class UsersController < ApplicationController
 		store = 0
 	
 		#その週の各日のship(予測),stored,store登録
-		for i in 1..6 do		
-			aver = sum / (7 - i)
+		for i in 1..6 do
+			#stored,shipの更新
+			day_remain = f_nw_py[(i-1)..-1].length - f_nw_py[(i-1)..-1].count(0)
+			day_remain = 1 if day_remain == 0
+			aver = sum / day_remain
 			amount = Amount.find_or_create_by(date: shipdate.since((j*7+1+i).day))
 			amount.update(f_stored: f_store, z_stored: z_store, f_ship: f_nw_py[i-1] , z_ship: z_nw_py[i-1], other_ship: other_nw_py[i-1])
+			amount.update(is_def: true, is_fin: true) if is_holiday(amount.date)
 			
+			#storeの計算，更新
 			store = [aver - (f_nw_py[i-1] + z_nw_py[i-1] + other_nw_py[i-1] - store), 0].max
 			f_store = (-z_sum * (f_nw_py[i-1] - f_store) + f_sum * (z_nw_py[i-1] - z_store + store) ) / (z_sum + f_sum)
 			f_store = [[f_store,store,f_nw_py[i]].min, 0].max
 			z_store = [store - f_store, z_nw_py[i]].min
+			f_store = z_store = 0 if is_holiday(amount.date)
 			store = f_store + z_store
-			
 			amount.update(f_store: f_store, z_store: z_store)
 			
+			#sumの更新
 			sum -= (amount.f_ship - amount.f_stored + amount.f_store) + (amount.z_ship - amount.z_stored + amount.z_store) + amount.other_ship
 			f_sum -= amount.f_ship - amount.f_stored + amount.f_store
 			z_sum -= amount.z_ship - amount.z_stored + amount.z_store

@@ -99,7 +99,6 @@
 </div>
 
 
-<% if @view_mode != 1 then %>
 <br><br>
 <div class="ckick-graph">
 <h3>今週の製造量推移</h3>
@@ -124,5 +123,3 @@ colors: ["#fff","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
 <%= column_chart @chart_data4, stacked: true,
 colors: ["#fff","#900","#009","#990"],legend: false %>
 </div>
-
-<% end %>
