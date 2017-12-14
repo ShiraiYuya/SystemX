@@ -26,7 +26,7 @@ def predict_n(target_day=date.today()):
     preds=[]#axis0:n週後、axis1:fzo、axis2:月～土
     for i in range(predict_week_num):
         pred=[]
-        max_day=target_monday-dt.timedelta(days=1)
+        max_day=target_monday-dt.timedelta(days=1)+dt.timedelta(days=i*7)
         for j in range(3):
             we = list(func.weeksum_day(max_day, next_pred[j][i], name))
             we.append(0)
