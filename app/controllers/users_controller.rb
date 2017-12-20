@@ -73,10 +73,10 @@ class UsersController < ApplicationController
 	
 	#本日のデータ取得
 	@time = Time.zone.now
-#	@time = DateTime.strptime('2017-12-31','%Y-%m-%d')
+#	@time = DateTime.strptime('2017-12-19','%Y-%m-%d')
 	date = Time.zone.today
 #	date = date.ago(1.day)
-#	date = DateTime.strptime('2017-12-31','%Y-%m-%d')
+#	date = DateTime.strptime('2017-12-16','%Y-%m-%d')
 	wday = date.wday
 	
 	if wday == 0
