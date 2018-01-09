@@ -32,20 +32,20 @@ class UsersController < ApplicationController
 			xls.default_sheet = '出荷台帳（入力順）'		
 			shipdate = Date.strptime(xls.cell(2,3).encode("UTF-8"),'%m/%d ')
 			
-			if shipdate == supposed_date
+			if (shipdate.month == supposed_date.month) and (shipdate.day == supposed_date.day)
 				
-				regist_xls(xls, shipdate, setting_fin)
+				regist_xls(xls, supposed_date, setting_fin)
 				
 				if setting_fin
-					@tabledate = Amount.find_or_create_by(date: shipdate)
+					@tabledate = Amount.find_or_create_by(date: supposed_date)
 					@view_mode = 3
-					@noexcelmsg = supdate_str+"の製造量を更新しました．値に間違いがなければ確認ボタンを押してください．"
+					@noexcelmsg = (supdate_str+"の製造量を更新しました．<br>値に間違いがなければ確認ボタンを押してください．").html_safe
 				else
 					#ここでpythonを実行
-					if shipdate.wday == 6
-						@noexcelmsg = regist_py_sat(shipdate)
+					if supposed_date.wday == 6
+						@noexcelmsg = regist_py_sat(supposed_date)
 					elsif
-						@noexcelmsg = regist_py(shipdate)
+						@noexcelmsg = regist_py(supposed_date)
 					end
 					@view_mode = 1 if @noexcelmsg != ""
 				end
@@ -72,11 +72,9 @@ class UsersController < ApplicationController
 	
 	
 	#本日のデータ取得
-	@time = Time.zone.now
-#	@time = DateTime.strptime('2017-12-19','%Y-%m-%d')
 	date = Time.zone.today
-#	date = date.ago(1.day)
-#	date = DateTime.strptime('2017-12-16','%Y-%m-%d')
+#	date = DateTime.strptime('2018-01-02','%Y-%m-%d')
+	@time = date
 	wday = date.wday
 	
 	if wday == 0
@@ -140,22 +138,43 @@ class UsersController < ApplicationController
 	
 	#テーブル内の浮動小数点問題解決
 	if @view_mode == 3
-		@table_f_make = BigDecimal([(@tabledate.f_ship - @tabledate.f_stored),0].max.to_s).floor(2).to_f
-		@table_z_make = BigDecimal([(@tabledate.z_ship - @tabledate.z_stored),0].max.to_s).floor(2).to_f
-		@table_all_make = BigDecimal((@table_f_make + @table_z_make + @tabledate.other_ship).to_s).floor(2).to_f
-		@table_all_premake = BigDecimal((@tabledate.f_store + @tabledate.z_store).to_s).floor(2).to_f
+		@table_f_make = floor_n([(@tabledate.f_ship - @tabledate.f_stored),0].max)
+		@table_z_make = floor_n([(@tabledate.z_ship - @tabledate.z_stored),0].max)
+		@table_other_make = floor_n(@tabledate.other_ship)
+		@table_all_make = floor_n([(@tabledate.f_ship - @tabledate.f_stored),0].max + [(@tabledate.z_ship - @tabledate.z_stored),0].max + @tabledate.other_ship)
+		@table_f_premake = floor_n(@tabledate.f_store)
+		@table_z_premake = floor_n(@tabledate.z_store)
+		@table_all_premake = floor_n(@tabledate.f_store + @tabledate.z_store)
+		
 	end
 	
 	if @view_mode == 4
-		@today_all_ship = BigDecimal((@today.f_ship + @today.z_ship + @today.other_ship).to_s).floor(2).to_f
-		@today_all_stored = BigDecimal((@today.f_stored + @today.z_stored).to_s).floor(2).to_f
-		@today_f_make = BigDecimal([(@today.f_ship - @today.f_stored),0].max.to_s).floor(2).to_f
-		@today_z_make = BigDecimal([(@today.z_ship - @today.z_stored),0].max.to_s).floor(2).to_f
-		@today_all_make = BigDecimal([(@today.f_ship - @today.f_stored + @today.z_ship - @today.z_stored + @today.other_ship),0].max.to_s).floor(2).to_f
-		@today_all_store = BigDecimal((@today.f_store + @today.z_store).to_s).floor(2).to_f
-		@today_f_summake = BigDecimal([(@today.f_ship - @today.f_stored + @today.f_store),0].max.to_s).floor(2).to_f
-		@today_z_summake = BigDecimal([(@today.z_ship - @today.z_stored + @today.z_store),0].max.to_s).floor(2).to_f
-		@today_all_summake = BigDecimal([(@today.f_ship - @today.f_stored + @today.f_store + @today.z_ship - @today.z_stored + @today.z_store + @today.other_ship),0].max.to_s).floor(2).to_f
+		@today_f_ship = floor_n(@today.f_ship)
+		@today_z_ship = floor_n(@today.z_ship)
+		@today_other_ship = floor_n(@today.other_ship)
+		@today_all_ship = floor_n(@today.f_ship + @today.z_ship + @today.other_ship)
+		
+		@today_f_stored = floor_n(@today.f_stored)
+		@today_z_stored = floor_n(@today.z_stored)
+		@today_all_stored = floor_n(@today.f_stored + @today.z_stored)
+		
+		@today_f_store = floor_n(@today.f_store)
+		@today_z_store = floor_n(@today.z_store)
+		@today_all_store = floor_n(@today.f_store + @today.z_store)
+		
+		@today_f_make = floor_n([(@today.f_ship - @today.f_stored),0].max)
+		@today_z_make = floor_n([(@today.z_ship - @today.z_stored),0].max)
+		@today_all_make = floor_n([(@today.f_ship - @today.f_stored + @today.z_ship - @today.z_stored + @today.other_ship),0].max)
+
+		
+		@today_f_summake = floor_n([(@today.f_ship - @today.f_stored + @today.f_store),0].max)
+		@today_z_summake = floor_n([(@today.z_ship - @today.z_stored + @today.z_store),0].max)
+		@today_all_summake = floor_n([(@today.f_ship - @today.f_stored + @today.f_store + @today.z_ship - @today.z_stored + @today.z_store + @today.other_ship),0].max)
+		
+		@today_f_ratio = floor_n([(@today.f_ship - @today.f_stored + @today.f_store),0].max / @today.f_ship )
+		@today_z_ratio = floor_n([(@today.z_ship - @today.z_stored + @today.z_store),0].max / @today.z_ship )
+		@today_other_ratio = "1.00"
+		@today_all_ratio = floor_n([(@today.f_ship - @today.f_stored + @today.f_store + @today.z_ship - @today.z_stored + @today.z_store + @today.other_ship),0].max / (@today.f_ship + @today.z_ship + @today.other_ship) )
 	end
 	
 	view_graph(date)
@@ -169,7 +188,10 @@ class UsersController < ApplicationController
   def stock
   end
   
-  
+  def floor_n(float)
+#	return BigDecimal(float.to_s).floor(2).to_f
+	return sprintf("%#.2f", float)
+  end
   
   def regist_xls(xls, shipdate, setting_fin)
 	swday = shipdate.wday
@@ -343,7 +365,7 @@ class UsersController < ApplicationController
 	wday = date.wday
 	
 	#グラフ用データ
-	wdaylist = ["Mon","Tue","Wed","Thu","Fri","Sat"]
+	wdaylist = ["月","火","水","木","金","土"]
 
 	f_ship_list = [] #出荷
 	f_make_list = [] #製造
@@ -376,6 +398,7 @@ class UsersController < ApplicationController
 			end
 			f_store_list.push([wdaylist[i-1],amount.f_store])
 			z_store_list.push([wdaylist[i-1],amount.z_store])
+			max_ship1 = amount.f_ship + amount.z_ship + amount.other_ship if i==6
 		end
 	end
 	
@@ -399,25 +422,26 @@ class UsersController < ApplicationController
 			z_makepred_nw_list.push([wdaylist[i-1],amount.z_ship-amount.z_stored]) if amount.z_ship-amount.z_stored>0
 			f_store_nw_list.push([wdaylist[i-1],amount.f_store])
 			z_store_nw_list.push([wdaylist[i-1],amount.z_store])
+			max_ship2 = amount.f_ship + amount.z_ship + amount.other_ship if i==6
 		end
 	end
 	
-
+	@max_ship = [max_ship1, max_ship2].max
 	
 	@chart_data = [
-	{name:"None",data:[["Mon",0],["Tue",0],["Wed",0],["Thu",0],["Fri",0],["Sat",0]]},
+	{name:"None",data:[["月",0],["火",0],["水",0],["木",0],["金",0],["土",0]]},
 	{name:"F確定",data:f_make_list},
-	{name:"全卵確定",data:z_make_list},
-	{name:"その他確定",data:other_ship_list},
 	{name:"F予測",data:f_makepred_list},
-	{name:"全卵予測",data:z_makepred_list},
-	{name:"その他予測",data:other_pred_list},
 	{name:"F作り置き",data:f_store_list},
-	{name:"全卵作り置き",data:z_store_list}
+	{name:"全卵確定",data:z_make_list},
+	{name:"全卵予測",data:z_makepred_list},
+	{name:"全卵作り置き",data:z_store_list},
+	{name:"その他確定",data:other_ship_list},
+	{name:"その他予測",data:other_pred_list}
 	]
 	
 	@chart_data2 = [
-	{name:"None",data:[["Mon",0],["Tue",0],["Wed",0],["Thu",0],["Fri",0],["Sat",0]]},
+	{name:"None",data:[["月",0],["火",0],["水",0],["木",0],["金",0],["土",0]]},
 	{name:"F確定",data:f_ship_list},
 	{name:"全卵確定",data:z_ship_list},
 	{name:"その他確定",data:other_ship_list},
@@ -427,16 +451,16 @@ class UsersController < ApplicationController
 	]
 	
 	@chart_data3 = [
-	{name:"None",data:[["Mon",0],["Tue",0],["Wed",0],["Thu",0],["Fri",0],["Sat",0]]},
+	{name:"None",data:[["月",0],["火",0],["水",0],["木",0],["金",0],["土",0]]},
 	{name:"F予測",data:f_makepred_nw_list},
-	{name:"全卵予測",data:z_makepred_nw_list},
-	{name:"その他予測",data:other_pred_nw_list},
 	{name:"F作り置き",data:f_store_nw_list},
-	{name:"全卵作り置き",data:z_store_nw_list}
+	{name:"全卵予測",data:z_makepred_nw_list},
+	{name:"全卵作り置き",data:z_store_nw_list},
+	{name:"その他予測",data:other_pred_nw_list}
 	]
 	
 	@chart_data4 = [
-	{name:"None",data:[["Mon",0],["Tue",0],["Wed",0],["Thu",0],["Fri",0],["Sat",0]]},
+	{name:"None",data:[["月",0],["火",0],["水",0],["木",0],["金",0],["土",0]]},
 	{name:"F予測",data:f_pred_nw_list},
 	{name:"全卵予測",data:z_pred_nw_list},
 	{name:"その他予測",data:other_pred_nw_list}

@@ -1,46 +1,76 @@
 <div class="ship-table">
-<h3>本日(<%= @time.month %>月<%= @time.day %>日)の製造量</h3>
+
 <% if @view_mode == 4 then %>
+<h3>本日(<%= @time.month %>月<%= @time.day %>日)の製造量</h3>
 <table>
   <tr>
-    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+    <th></th>
+	<th class="type_f">F</th>
+	<th class="type_z">全卵</th>
+	<th class="type_o">その他</th>
+	<th class="type_sum">合計</th>
   </tr>
   <tr>
-    <td class="vertical">本日出荷量</td>
-	<td><%= @today.f_ship %></td>
-	<td><%= @today.z_ship %></td>
-	<td><%= @today.other_ship %></td>
-	<td><%= @today_all_ship%></td>
+	<td></td>
+	<td><div class="type_f triangle"></div></td>
+	<td><div class="type_z triangle"></div></td>
+	<td><div class="type_o triangle"></div></td>
+	<td><div class="type_sum triangle"></div></td>
   </tr>
-  <tr>
-    <td class="vertical">作り置き利用分</td>
-	<td><%= @today.f_stored %></td>
-	<td><%= @today.z_stored %></td>
-	<td class="nodata"></td>
-	<td><%= @today_all_stored %></td>
+  <tr class="tr_main">
+    <td class="vertical"><span>製造量</span></td>
+	<td class="type_f"><span><%= @today_f_summake %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_summake %></span> kg</td>
+	<td class="type_o"><span><%= @today_other_ship %></span> kg</td>
+	<td class="type_sum"><span><%= @today_all_summake %></span> kg</td>
   </tr>
-  <tr>
-    <td class="vertical">本日分製造量</td>
-	<td><%= @today_f_make %></td>
-	<td><%= @today_z_make %></td>
-	<td><%= @today.other_ship %></td>
-	<td><%= @today_all_make %></td>
+  <tr class="tr_sub">
+    <td class="vertical"> -本日出荷分</td>
+	<td class="type_f"><span><%= @today_f_make %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_make %></span> kg</td>
+	<td class="type_o"><span><%= @today_other_ship %></span> kg</td>
+	<td class="type_sum"><span><%= @today_all_make %></span> kg</td>
   </tr>
-  <tr>
-    <td class="vertical">作り置き分製造量</td>
-	<td><%= @today.f_store %></td>
-	<td><%= @today.z_store %></td>
-	<td class="nodata"></td>
-	<td><%= @today_all_store %></td>
+  <tr class="tr_sub">
+    <td class="vertical"> -翌日出荷分</td>
+	<td class="type_f"><span><%= @today_f_store %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_store %></span> kg</td>
+	<td class="type_o"></td>
+	<td class="type_sum"><span><%= @today_all_store %></span> kg</td>
   </tr>
-  <tr>
-    <td class="vertical">総製造量</td>
-	<td><%= @today_f_summake %></td>
-	<td><%= @today_z_summake %></td>
-	<td><%= @today.other_ship %></td>
-	<td><%= @today_all_summake %></td>
+  <tr class="tr_main">
+    <td class="vertical"><span>出荷量</span></td>
+	<td class="type_f"><span><%= @today_f_ship %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_ship %></span> kg</td>
+	<td class="type_o"><span><%= @today_other_ship %></span> kg</td>
+	<td class="type_sum"><span><%= @today_all_ship%></span> kg</td>
   </tr>
+  <tr class="tr_sub">
+    <td class="vertical"> -昨日製造分</td>
+	<td class="type_f"><span><%= @today_f_stored %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_stored %></span> kg</td>
+	<td class="type_o"></td>
+	<td class="type_sum"><span><%= @today_all_stored %></span> kg</td>
+  </tr>
+  <tr class="tr_sub">
+    <td class="vertical"> -本日製造分</td>
+	<td class="type_f"><span><%= @today_f_make %></span> kg</td>
+	<td class="type_z"><span><%= @today_z_make %></span> kg</td>
+	<td class="type_o"><span><%= @today_other_ship %></span> kg</td>
+	<td class="type_sum"><span><%= @today_all_make %></span> kg</td>
+  </tr>
+  <tr class="tr_main tr_last">
+    <td class="vertical"><span>製造/出荷</span></td>
+	<td class="type_f"><span><%= @today_f_ratio %></span> 倍</td>
+	<td class="type_z"><span><%= @today_z_ratio %></span> 倍</td>
+	<td class="type_o"><span><%= @today_other_ratio %></span> 倍</td>
+	<td class="type_sum"><span><%= @today_all_ratio %></span> 倍</td>
+	
+  </tr>
+  
+  
 </table>
+
 <% else %>
 <p id="noexcel">
 	<%=@noexcelmsg %>
@@ -61,15 +91,28 @@
 	<%= form_tag({controller: "users",action: "index", method: "post"}, {multipart: true}) do %>
 <table class="fin_table">
   <tr>
-    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+    <th></th>
+	<th class="type_f">F</th>
+	<th class="type_z">全卵</th>
+	<th class="type_o">その他</th>
+	<th class="type_sum">合計</th>
   </tr>
   <tr>
-    <td class="vertical">当日分製造量</td>
-	<td><%= @table_f_make %></td>
-	<td><%= @table_z_make %></td>
-	<td><%= @tabledate.other_ship %></td>
-	<td><%= @table_all_make %></td>
+	<td></td>
+	<td><div class="type_f triangle"></div></td>
+	<td><div class="type_z triangle"></div></td>
+	<td><div class="type_o triangle"></div></td>
+	<td><div class="type_sum triangle"></div></td>
   </tr>
+  
+  <tr class="tr_sub">
+    <td class="vertical">本日出荷分</td>
+	<td class="type_f"><span><%= @table_f_make %></span> kg</td>
+	<td class="type_z"><span><%= @table_z_make %></span> kg</td>
+	<td class="type_o"><span><%= @table_other_make %></span> kg</td>
+	<td class="type_sum"><span><%= @table_all_make %></span> kg</td>
+  </tr>
+
 </table>
 		<%= hidden_field_tag :setting_fin, @view_mode == 3 ? true:false %>
 		<%= hidden_field_tag :supposed_date, @tabledate.date %>
@@ -77,18 +120,15 @@
 		<%= file_field_tag :file %>
 	<% end %>
 	<%= form_tag({controller: "users",action: "index", method: "post"}, {multipart: true}) do %>
-<br><br>
 <table class="fin_table">
-  <tr>
-    <th></th><th>F</th><th>全卵</th><th>その他</th><th>計</th>
+  <tr class="tr_sub">
+    <td class="vertical">翌日出荷分</td>
+	<td class="type_f td_input"><%= text_field_tag :f_result, @table_f_premake,:size=>"3" %><span> kg</span></td>
+	<td class="type_z td_input"><%= text_field_tag :z_result, @table_z_premake,:size=>"3" %><span> kg</span></td>
+	<td class="type_o"></td>
+	<td class="type_sum"><%= @table_all_premake %> kg</td>
   </tr>
-  <tr>
-    <td class="vertical">作り置き分製造量</td>
-	<td><%= text_field_tag :f_result, @tabledate.f_store,:size=>"3" %></td>
-	<td><%= text_field_tag :z_result, @tabledate.z_store,:size=>"3" %></td>
-	<td class="nodata"></td>
-	<td><%= @table_all_premake %></td>
-  </tr>
+
 </table>	
 		<%= submit_tag "確定" %>
 		<%= hidden_field_tag :setting_fin, true %>
@@ -102,24 +142,24 @@
 <br><br>
 <div class="ckick-graph">
 <h3>今週の製造量推移</h3>
-<%= column_chart @chart_data, stacked: true,
-colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
+<%= column_chart @chart_data, stacked: true, max:@max_ship,
+colors: ["#fff","#f00","#800","f99","#00f","#008","#99f","#ffc520","#9f7500"],legend: false %>
 </div>
 
 <div class="ckick-graph">
 <h3>今週の出荷量推移</h3>
-<%= column_chart @chart_data2, stacked: true,
-colors: ["#fff","#f00", "#00f","ff0","#900","#009","#990"],legend: false %>
+<%= column_chart @chart_data2, stacked: true, max:@max_ship,
+colors: ["#fff","#f00", "#00f","#ffc520","#800","#008","#9f7500"],legend: false %>
 </div>
 
 <div class="ckick-graph nw-graph">
 <h3>翌週の製造量推移</h3>
-<%= column_chart @chart_data3, stacked: true,
-colors: ["#fff","#900","#009","#990","#ffe5de","#e8e8e8"],legend: false %>
+<%= column_chart @chart_data3, stacked: true, max:@max_ship,
+colors: ["#fff","#800","#f99","#008","#99f","#ffc520","#9f7500"],legend: false %>
 </div>
 
 <div class="ckick-graph nw-graph">
 <h3>翌週の出荷量推移</h3>
-<%= column_chart @chart_data4, stacked: true,
-colors: ["#fff","#900","#009","#990"],legend: false %>
+<%= column_chart @chart_data4, stacked: true, max:@max_ship,
+colors: ["#fff","#800","#008","#ffc520"],legend: false %>
 </div>

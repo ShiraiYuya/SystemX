@@ -1,5 +1,12 @@
 ﻿
 gitコマンドのメモです
+git add (ファイル名)
 git add * //全てのファイル・ディレクトリを追加
 git commit -m "コミット名"
+git commit --amend -m "コミット名"　//一つ前のコミットと統合
+git log //ログを確認
+git status //現在の状態
+git checkout --(ファイル名) //前の状態に戻る
+git checkout (ブランチ名) //ブランチを移動
+git diff //編集した場所を知る
 git push origin master
