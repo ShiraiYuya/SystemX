@@ -55,7 +55,6 @@ test:
 production:
   <<: *default
   adapter: mysql2
-  encoding: unicode
   pool: 5
 
 #  database: SystemX_production

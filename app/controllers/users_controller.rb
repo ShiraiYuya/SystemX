@@ -73,7 +73,7 @@ class UsersController < ApplicationController
 	
 	#本日のデータ取得
 	date = Time.zone.today
-#	date = DateTime.strptime('2018-01-02','%Y-%m-%d')
+	date = DateTime.strptime('2018-01-18','%Y-%m-%d')
 	@time = date
 	wday = date.wday
 	
