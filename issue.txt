@@ -27,3 +27,19 @@ gemのSQLの行をdevelopmentとproductionで書き分けていたけど，統�
 production用をmysql2に修正
 
 6 bundle installする
+→したら一回pushする！
+
+7 データベース作成
+普通にdb:migrate,db:seedを実施
+
+8　ブラウザからアクセス
+⇒上手くいかず！
+Application error
+・log確認
+→seedまでは上手くいっている模様．
+[web.1]State changed from starting to crashed
+[router]at=error code=H10 desc="App crashed"... status=503...
+[web.1]State changed from crashed to starting
+[web.1]Process exited with status 1
+[web.1]syntax error near unexpected token '('
+[run.2338]Error R13 (Attach error) ->Failed to attach to process
