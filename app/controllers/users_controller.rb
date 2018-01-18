@@ -3,7 +3,7 @@ require 'open3'
 
 class UsersController < ApplicationController
   def index
-  
+	'''
 	#1→日曜/祝日/エラー(グラフのみ表示)，2→is_defが必要(excelフォームとグラフのみ出現)，
 	#3→is_finが必要(excelフォームと表修正フォームとグラフが出現)，4→正常(表とグラフを表示)
 	@view_mode = 0
@@ -178,6 +178,7 @@ class UsersController < ApplicationController
 	end
 	
 	view_graph(date)
+	'''
   end
 
   def conf
