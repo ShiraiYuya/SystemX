@@ -47,11 +47,17 @@ test:
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
+#production:
+#  <<: *default
+#  adapter: postgresql
+#  encoding: unicode
+#  pool: 5
 production:
   <<: *default
-  adapter: postgresql
+  adapter: mysql2
   encoding: unicode
   pool: 5
+
 #  database: SystemX_production
 #  username: SystemX
 #  password: <%= ENV['SYSTEMX_DATABASE_PASSWORD'] %>

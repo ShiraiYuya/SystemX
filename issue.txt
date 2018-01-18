@@ -1,14 +1,29 @@
-﻿
-gitコマンドのメモです
-git clone (リポジトリのアドレス)　//ローカルにクローン作成
+﻿//herokuのDBをmysqlにしてやるぞ
+//そうしたら①configでDB環境使い分けなくていい②コード書き分けなくていい
 
-git add (ファイル名)
-git add * //全てのファイル・ディレクトリを追加
-git commit -m "コミット名"
-git commit --amend -m "コミット名"　//一つ前のコミットと統合
-git log //ログを確認
-git status //現在の状態
-git checkout --(ファイル名) //前の状態に戻る
-git checkout (ブランチ名) //ブランチを移動
-git diff //編集した場所を知る
-git push origin master
+1 クレジットカード登録
+herokuのページにログインして登録
+※herokuはクレジット登録がないとmysql使えない！
+
+2 ClearDBアドオンの追加
+heroku上にmysqlのアドオンを追加
+> heroku addons:add cleardb
+
+3 configファイル中のDATABASE_URL変更
+> heroku config　//するとCLEARDB_DATABASE_URLが追加されてる！
+> heroku config:set DATABASE_URL=mysql2://~~~  //上記のやつをDATABASE_URLにも更新
+※これだと上手くいかない！Cannot overwrite attachmentと出る.次のように対策
+> heroku addons:attach heroku-postgresql -a systemx-pred --as HEROKU_DATABASE
+> heroku addons:detach DATABASE -a systemx-pred
+> heroku config:set DATABASE_URL=mysql2://~~~
+//herokuのaddonを確認すると分かる通り，mysqlがCLEARDB_DATABASE,postgresqlがDATABASEというエイリアス（Attachmentと呼ぶらしい）で管理されている．そこでまずpostgresqlをHEROKU_DATABASEというエイリアスでattachする（関連させる）.その後DATABASEのattachを外す．するとDATABASE_URLはどれとも関連付けられていないのでoverwrite可能になる
+
+4 Gemfile変更
+環境ごとにライブラリとそのバージョンを管理してくれるファイル．
+gemのSQLの行をdevelopmentとproductionで書き分けていたけど，統一しました
+
+5 database.yml変更
+環境ごとにデータベースの種類，権限情報などを登録するファイル．
+production用をmysql2に修正
+
+6 bundle installする
