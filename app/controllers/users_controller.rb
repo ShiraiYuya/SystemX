@@ -425,6 +425,8 @@ class UsersController < ApplicationController
 		end
 	end
 	
+	max_ship1 = 0 if max_ship1.nil?
+	max_ship2 = 0 if max_ship2.nil?
 	@max_ship = [max_ship1, max_ship2].max
 	
 	@chart_data = [
