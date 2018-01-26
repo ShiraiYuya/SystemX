@@ -15,17 +15,11 @@ class UsersController < ApplicationController
 		supposed_date = Date.strptime(params[:supposed_date],'%Y-%m-%d')
 		supdate_str = supposed_date.strftime("%m月%d日")
 		#excelの取得
-		if params[:file].path.split(".").last != "xls"
+		if (params[:file].path.split(".").last != "xls" or
+			Roo::Excel.new(params[:file].path).sheets[0] != '出荷台帳（入力順）')
 			@noexcelmsg = "正しいエクセルファイルが登録されていません．<br>".html_safe+supdate_str+"のファイルを登録してください．"
 			@tabledate = Amount.find_or_create_by(date: supposed_date)
-			@view_mode = 2
-			@view_mode = 3 if setting_fin
-			
-		elsif Roo::Excel.new(params[:file].path).sheets[0] != '出荷台帳（入力順）'
-			@noexcelmsg = "正しいエクセルファイルが登録されていません．<br>".html_safe+supdate_str+"のファイルを登録してください．"
-			@tabledate = Amount.find_or_create_by(date: supposed_date)
-			@view_mode = 2
-			@view_mode = 3 if setting_fin
+			@view_mode = (setting_fin ? 3 : 2)			
 		else
 			xls = Roo::Excel.new(params[:file].path)
 			xls.default_sheet = '出荷台帳（入力順）'		
@@ -51,14 +45,14 @@ class UsersController < ApplicationController
 			else
 				@noexcelmsg = "正しいエクセルファイルが登録されていません．<br>".html_safe+supdate_str+"のファイルを登録してください．"
 				@tabledate = Amount.find_or_create_by(date: supposed_date)
-				@view_mode = 2
-				@view_mode = 3 if setting_fin
+				@view_mode = (setting_fin ? 3 : 2)
 			end
 		end
 	end
 	#ここまでexcel受け取り時の処理
 	
 	#作り置き製造量の実績値を受け取ってDBに渡す
+	#ここでis_fin=trueになる
 	if params[:commit] == "確定"
 		supposed_date = Date.strptime(params[:supposed_date],'%Y-%m-%d')
 		amount = Amount.find_by(date: supposed_date)
@@ -72,7 +66,7 @@ class UsersController < ApplicationController
 	
 	#本日のデータ取得
 	date = Time.zone.today
-#	date = DateTime.strptime('2018-01-18','%Y-%m-%d')
+#	date = DateTime.strptime('2018-01-20','%Y-%m-%d')
 	@time = date
 	wday = date.wday
 	
@@ -198,6 +192,7 @@ class UsersController < ApplicationController
 	#出荷量の算出
 	f,zenran,other = 0,0,0
 	for i in 4..xls.last_row do
+		#sizeやnumのところに数値がないとバグりそう
 		if xls.cell(i, 4) != nil
 			product = xls.cell(i, 4).encode("UTF-8")
 			size = xls.cell(i, 6).tr!("０-９", "0-9").to_i
@@ -218,14 +213,14 @@ class UsersController < ApplicationController
 	other /= 1000 
 		
 	#ここでDBに登録
-	#初回:is_def→true,shipに加えmornも登録
-	#２回目以降:shipのみ更新
+	#初回:shipに加えmornも登録(このあとpython計算上手くいけばis_def=trueになる)
+	#２回目以降:shipのみ更新　→　現状ここは存在しないが・・・
 	#最後（翌日）:is_fin→true,ship更新
 	amount = Amount.find_or_create_by(date: shipdate)
 	if amount.is_def
 		amount.update(f_ship: f, z_ship: zenran, other_ship: other)
 	else
-		amount.update(f_ship: f, f_morn: f, z_ship: zenran,z_morn: zenran, other_ship: other, other_morn: other, is_def: true)
+		amount.update(f_ship: f, f_morn: f, z_ship: zenran,z_morn: zenran, other_ship: other, other_morn: other)
 	end	
   end
   
@@ -250,12 +245,12 @@ class UsersController < ApplicationController
 	return(out.to_s) if out.length != 21
 	
 	#受け取りは各日の予測出荷量（f,z,other別）：月から日まで
+	amount = Amount.find_by(date: shipdate)
 	f_py = out[0..6]
 	z_py = out[7..13]
 	other_py = out[14..20]
 	
 	#shipdate~土までに作る総量sum（f,z,other別），平均averを算出
-	amount = Amount.find_by(date: shipdate)
 	f_sum = amount.f_ship - amount.f_stored + f_py.sum
 	z_sum = amount.z_ship - amount.z_stored + z_py.sum
 	other_sum = amount.other_ship + other_py.sum
@@ -271,7 +266,8 @@ class UsersController < ApplicationController
 	z_store = [store - f_store, z_py[swday]].min
 	f_store = z_store = 0 if is_holiday(shipdate)
 	store = f_store + z_store
-	amount.update(f_store: f_store, z_store: z_store)
+	#ここでis_def=trueになる
+	amount.update(f_store: f_store, z_store: z_store, is_def: true)
 	
 	#sumの更新
 	sum -= (amount.f_ship - amount.f_stored + amount.f_store) + (amount.z_ship - amount.z_stored + amount.z_store) + amount.other_ship
@@ -315,6 +311,9 @@ class UsersController < ApplicationController
 	out = out.map(&:to_i)
 	return(err) if err != ""
 	return(out.to_s) if out.length != 42
+	
+	amount = Amount.find_by(date: shipdate)
+	amount.update(is_def: true)
 	
 	#j=0は翌週分，j=1は翌々週分	
 	for j in 0..1
