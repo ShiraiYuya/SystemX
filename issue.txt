@@ -54,12 +54,24 @@ SQLをたたきすぎてたからclearDBの制約回数に引っかかってい�
 →デプロイ時に倍増する模様．（seed消してもローカルのDBがそのまま追加されてしまう．）
 ※mysql監視できるようにMySQL WorkBenchを入れた！
 →ローカルのDBを空にしてみる
+→それでも追加されてしまう（謎）
 
-mysql-connectorが入りません
+◎mysql-connectorが入りません　→　クローズ
 (error: option --single-version-externally-managed not recognized)
 →mysql-connector-pythonにしたら入った(-rfを削った)
 //-rfについては，setuptoolsを新しいバージョンにするか，wheelを入れるといけるっぽい．やってないけど
 //上記のオプションは，python　packageを構築するときのバージョン管理の仕方に関するもの・・・？
+
+◎python実行時にまたしても制約回数に引っかかる（何回実行しているのか？？）
+mysql.connector.errors.ProgrammingError: 1226 (42000): User 'b5145f4c532cd9' has exceeded the 'max_questions' resource (current value: 3600)
+あとこんなのも
+W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+→これはスクリプトに
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+と書けばよいらしい（やってみよう）
+
+
 
 pythonによるmysqlアクセスのconfigをdevelopmentとproductionで書き分け
 →それぞれの環境実行時にここを修正する必要あり！！
@@ -73,4 +85,10 @@ pythonによるmysqlアクセスのconfigをdevelopmentとproductionで書き分
 ・migrate,seed→上記で上手く連携が取れているのでrailsの仕様で指示をすればDB作成できる
 
 
-Traceback (most recent call last): File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/network.py", line 509, in open_connection self.sock.connect(sockaddr) ConnectionRefusedError: [Errno 111] Connection refused During handling of the above exception, another exception occurred: Traceback (most recent call last): File "predict_daybyday.py", line 6, in <module> import func File "/app/app/assets/python/func.py", line 28, in <module> buffered=True) File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/__init__.py", line 179, in connect return MySQLConnection(*args, **kwargs) File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/connection.py", line 95, in __init__ self.connect(**kwargs) File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/abstracts.py", line 728, in connect self._open_connection() File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/connection.py", line 235, in _open_connection self._socket.open_connection() File "/app/.heroku/python/lib/python3.6/site-packages/mysql/connector/network.py", line 512, in open_connection errno=2003, values=(self.get_address(), _strioerror(err))) mysql.connector.errors.InterfaceError: 2003: Can't connect to MySQL server on 'localhost:3306' (111 Connection refused)
+現在のクエリ数　2652=884*3 ??
+3540 = 2652 + 888
+4568 = 3540 + 1118
+5316 = 4568 + 748 //増える件数が違うのは途中でmax_questionsを超えるから?
+6204 = 5316 + 888 
+7306　= 6204 + 1102 //dyno起動時にこうなる（workbenchを実行しただけ）．888件超えているのは一日一回のdyno再起動による？
+//アクセスしただけで増えるんや！！！しかし複数回連続でアクセスしても変化なく，時間をあけてアクセスすると増える．

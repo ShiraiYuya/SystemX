@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-#MySQL (local)
 '''
+#MySQL (local)
+
 user = 'root'
 host = 'localhost'
 passwd = 'AwajiSys@15'

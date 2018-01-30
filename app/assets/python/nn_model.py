@@ -13,6 +13,7 @@ import tensorflow as tf
 from sklearn.utils import shuffle
 import os
 import sys
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 rng = np.random.RandomState(724)
 random_state = 1119
