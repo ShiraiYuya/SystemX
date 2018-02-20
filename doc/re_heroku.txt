@@ -1,0 +1,44 @@
+heroku再構築
+
+まずは同じherokuアカウント内でsystemy-pred作成
+
+1.アプリ作成
+> heroku create systemy-pred
+
+2.PostgreSQL入れる
+//issue.txtを参考に
+> heroku addons:add cleardb --app systemy-pred
+
+3.config見てみる
+> heroku config --app systemy-pred
+//CLEARDB_DATABASE_URLが作成されてる
+user:b35093a6e3bb2f
+pass:be7eba5a
+server:us-cdbr-iron-east-05.cleardb.net
+db:heroku_622e230d8e4a01a
+
+4.configにDATABASE_URLを作成
+> heroku config:set DATABASE_URL=mysql2://~~~ --app systemy-pred
+
+5.pythonディレクトリのconfig.py書き換え
+
+6.heroku上にpythonのビルドパックを追加する設定
+> heroku buildpacks:add heroku/python --app systemy-pred
+
+7.systemY上にgitのリモートブランチ作成
+> git remote add heroku2 https://git.heroku.com/systemy-pred.git
+
+8.デプロイ
+> git push heroku2 master
+
+9.DB作成
+> heroku run rake db:migrate --app systemy-pred
+> heroku run rake db:seed --app systemy-pred
+//WorkBench確認したところしっかり894件入っていた
+
+10.アクセス
+→できず・・・．H10エラー（status=503）
+
+11.ログ確認
+> heroku run rails c --app systemy-pred
+→またもやmax_questionを超えている．．． 

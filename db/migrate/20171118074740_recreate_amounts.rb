@@ -1,5 +1,5 @@
 class RecreateAmounts < ActiveRecord::Migration[5.1]
-  def change
+  def change	
   create_table :amounts do |t|
 	  t.date	:date
 	  t.float	:f_ship, default: 0
